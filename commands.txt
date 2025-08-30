@@ -1,0 +1,15 @@
+npm init -y
+
+"scripts": {
+  "dev": "vite"
+}
+
+npm install vite --save-dev
+
+npm run dev
+
+
+
+node src/physics.js 
+
+npm install --save lil-gui
