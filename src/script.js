@@ -2,7 +2,15 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import * as dat from "lil-gui";
-import { calculateAccelrate, calculateAirForce, calculateGravityForce, calculateK, calculateTotalForce, calculateVelocity, parachutePosition } from './physics.ts';
+import {
+  calculateAccelrate,
+  calculateAirForce,
+  calculateGravityForce,
+  calculateK,
+  calculateTotalForce,
+  calculateVelocity,
+  parachutePosition,
+} from "./physics.ts";
 
 /**
  * Scene
@@ -34,13 +42,16 @@ const gltfLoader = new GLTFLoader();
  * Models & Mixers
  */
 let soldier_model, helicopter_model, parachute_model;
-let soldier_mixer = null, helicopter_mixer = null;
+let soldier_mixer = null,
+  helicopter_mixer = null;
 
 const group = new THREE.Group();
-const soldierWidth = 0.01, soldierHight = 0.01;
-let actualParachuteWidth = 0.3, actualParachuteHight = 0.3;
-let parachuteWidth = 0.3, parachuteHight = 0.3;
-
+const soldierWidth = 0.01,
+  soldierHight = 0.01;
+let actualParachuteWidth = 0.3,
+  actualParachuteHight = 0.3;
+let parachuteWidth = 0.3,
+  parachuteHight = 0.3;
 
 /**
  * GUI
@@ -90,17 +101,20 @@ gltfLoader.load("/low_poly_soldier_free_gltf/scene.gltf", (gltf) => {
 /**
  * Load Helicopter
  */
-gltfLoader.load("/mh_6_little_bird_helicopter_animated_gltf/scene.gltf", (gltf) => {
-  helicopter_model = gltf.scene;
-  helicopter_model.position.set(2, -3, 0);
-  helicopter_model.scale.set(0.005, 0.005, 0.005);
-  scene.add(helicopter_model);
+gltfLoader.load(
+  "/mh_6_little_bird_helicopter_animated_gltf/scene.gltf",
+  (gltf) => {
+    helicopter_model = gltf.scene;
+    helicopter_model.position.set(2, -3, 0);
+    helicopter_model.scale.set(0.005, 0.005, 0.005);
+    scene.add(helicopter_model);
 
-  helicopter_mixer = new THREE.AnimationMixer(gltf.scene);
-  helicopter_mixer.clipAction(gltf.animations[0]).play();
+    helicopter_mixer = new THREE.AnimationMixer(gltf.scene);
+    helicopter_mixer.clipAction(gltf.animations[0]).play();
 
-  modelLoaded();
-});
+    modelLoaded();
+  }
+);
 
 /**
  * Load Parachute
@@ -124,41 +138,58 @@ function startSimulation() {
   scene.add(group);
 
   // GUI Toggle Parachute
-  gui.add(parachuteControl, 'visible').name("Toggle Parachute").onChange((value) => {
-    h0 = group.position.y;
-    if (!parachute_model) return;
-    parachute_model.visible = value;
-    parachuteWidth = parachuteHight = value ? 3 : 0;
-  });
+  gui
+    .add(parachuteControl, "visible")
+    .name("Toggle Parachute")
+    .onChange((value) => {
+      h0 = group.position.y;
+      if (!parachute_model) return;
+      parachute_model.visible = value;
+      parachuteWidth = parachuteHight = value ? 3 : 0;
+    });
 
   const scaleControl = { scale: parachuteWidth };
 
-gui.add(scaleControl, 'scale', 0.3, 2, 0.01).name("Scale X&Z").onChange((value) => {
-  parachuteWidth = value * 10;
-  parachuteHight = value * 10;
+  gui
+    .add(scaleControl, "scale", 0.3, 2, 0.01)
+    .name("Scale X&Z")
+    .onChange((value) => {
+      parachuteWidth = value * 10;
+      parachuteHight = value * 10;
 
-  if (parachute_model) {
-    parachute_model.scale.set(actualParachuteWidth,  parachute_model.scale.y , actualParachuteHight);
+      actualParachuteWidth = value *  2
+      actualParachuteHight = value * 2
+      if (parachute_model) {
+        parachute_model.scale.set(
+          actualParachuteWidth ,
+          parachute_model.scale.y,
+          actualParachuteHight 
+        );
 
-    console.log(`parachuteWidth = ${parachuteWidth}`);
-    console.log(`parachuteHight = ${parachuteHight}`);
-  }
-});
+        console.log(`parachuteWidth = ${parachuteWidth}`);
+        console.log(`parachuteHight = ${parachuteHight}`);
+      }
+    });
 
-const start = { start: false };
+  const start = { start: false };
 
-gui.add(start, 'start').name("start").onChange((value) => {
-  if(value)
-    tick();
-
-});
-
+  gui
+    .add(start, "start")
+    .name("start")
+    .onChange((value) => {
+      if (value) tick();
+    });
 }
 
 /**
  * Camera
  */
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
 camera.position.set(0, 1, 10);
 scene.add(camera);
 
@@ -199,21 +230,24 @@ const m = 80;
 var i = 0;
 // إعدادات الكاميرا القابلة للتعديل
 const cameraSettings = {
-  sideOffset: 6,   // المسافة الجانبية عن الجسم
+  sideOffset: 6, // المسافة الجانبية عن الجسم
   heightOffset: 0, // ارتفاع الكاميرا فوق الجسم
 };
 
 // إضافة GUI
-gui.add(cameraSettings, 'sideOffset', 1, 20, 0.1).name("Camera Side Offset");
-gui.add(cameraSettings, 'heightOffset', -5, 10, 0.1).name("Camera Height Offset");
+gui.add(cameraSettings, "sideOffset", 1, 20, 0.1).name("Camera Side Offset");
+gui
+  .add(cameraSettings, "heightOffset", -5, 10, 0.1)
+  .name("Camera Height Offset");
 
+  group.position.y = 100;
 // داخل tick loop
 function tick() {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
 
-   if(i == 0){
+  if (i == 0) {
     console.log(`this is start Time ${clock.startTime}`);
     i++;
   }
@@ -221,7 +255,9 @@ function tick() {
   controls.update();
 
   // حركة المظلة والجسم كما لديك
-  const A = parachuteControl.visible ? parachuteWidth * parachuteHight * 2 : 0.7;
+  const A = parachuteControl.visible
+    ? parachuteWidth * parachuteHight * 2
+    : 0.7;
 
   // console.log(`this is A = ${A}`);
 
@@ -230,28 +266,31 @@ function tick() {
 
   //console.log(`this is k = ${k}`);
 
-  const y = parachutePosition(elapsedTime, m, k);
-  const v = calculateVelocity(elapsedTime, m , k); //
+  
+ const y = parachutePosition(elapsedTime, m, k);
+  const v = calculateVelocity(elapsedTime, m, k); //
   const Fr = calculateAirForce(k, v);
   const Fg = calculateGravityForce(m);
-  const a = calculateAccelrate(m,k,v);
-  const F = calculateTotalForce(Fg,Fr);
+  const a = calculateAccelrate(m, k, v);
+  const F = calculateTotalForce(Fg, Fr);
 
-  const h = h0 - y;
-  if (h > -500){  
-
+  let h = group.position.y;
+  if (h > -500) {
     console.log(`\n
+      this is y = ${y}\n
+      this is h = ${h}\n
       this is velocity = ${v}\n
       this is Fr = ${Fr}\n
       this is Accelrate = ${a}\n
       this is Total Force = ${F}\n
       this is A = ${A}\n
       this is k = ${k}\n`);
+    h -= v * deltaTime; // نقص بقدر السرعة × الزمن
 
     group.position.y = h;
-  }else{
-    console.log(Math.sqrt((m*9.81)/k));
-    console.log(`this is the final time ${clock.oldTime-clock.startTime}`);
+  } else {
+    console.log(Math.sqrt((m * 9.81) / k));
+    console.log(`this is the final time ${clock.oldTime - clock.startTime}`);
     return;
   }
 
@@ -260,9 +299,9 @@ function tick() {
   const targetY = group.position.y + cameraSettings.heightOffset;
   const targetZ = group.position.z + cameraSettings.sideOffset;
 
-  camera.position.x += (targetX - camera.position.x) ;
-  camera.position.y += (targetY - camera.position.y) ;
-  camera.position.z += (targetZ - camera.position.z);
+  camera.position.x += targetX - camera.position.x;
+  camera.position.y += targetY - camera.position.y;
+  camera.position.z += targetZ - camera.position.z;
 
   camera.lookAt(group.position);
 
@@ -273,4 +312,3 @@ function tick() {
   renderer.render(scene, camera);
   window.requestAnimationFrame(tick);
 }
- 
