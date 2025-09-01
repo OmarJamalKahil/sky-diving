@@ -2,7 +2,7 @@ export function calculateK(Cd: number, A: number, p: number = 1.225): number {
     return (1 / 2) * Cd * p * A ;
 }
 
-export function forcesAndAcceleration3DWithWind(
+export function totalForcesAndAccelration(
   m: number,
   k: number,
   vx: number,
@@ -44,7 +44,7 @@ export function forcesAndAcceleration3DWithWind(
 }
 
 
-export function stepSemiImplicit(
+export function newPosition(
   x: number,
   y: number,
   z: number,
@@ -60,7 +60,7 @@ export function stepSemiImplicit(
   g: number = 9.81
 ) {
     
-  const { ax, ay, az } = forcesAndAcceleration3DWithWind(
+  const { ax, ay, az } = totalForcesAndAccelration(
     m, k, vx, vy, vz, windVx, windVy, windVz, g
   );
 

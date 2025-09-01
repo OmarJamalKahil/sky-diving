@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import * as dat from "lil-gui";
-import { calculateK, stepSemiImplicit } from "./physics.ts";
+import { calculateK, newPosition } from "./physics.ts";
 
 /**
  * Scene
@@ -30,6 +30,7 @@ scene.background = enviromentMap;
  */
 let soldier_model, soldier_model_first, helicopter_model, parachute_model;
 let soldier_mixer = null,
+soldier_mixer_Standing = null,
   soldier_mixer_First = null,
   helicopter_mixer = null;
 
@@ -80,8 +81,7 @@ function modelLoaded() {
           z = helicopterGroup.position.z - 3;
 
           group.rotateY(Math.PI);
-          // تدوير الجندي مرة واحدة
-          // تدوير الجندي مرة واحدة
+
         } else {
           z = helicopterGroup.position.z + 3;
         }
@@ -115,7 +115,11 @@ gltfLoader.load("/low_poly_soldier_free_gltf/scene.gltf", (gltf) => {
   group.add(soldier_model);
 
   soldier_mixer = new THREE.AnimationMixer(gltf.scene);
+  soldier_mixer_Standing = new THREE.AnimationMixer(gltf.scene);
+
   soldier_mixer.clipAction(gltf.animations[1]).play();
+  soldier_mixer_Standing.clipAction(gltf.animations[0]).play();
+
 
   modelLoaded();
 });
@@ -455,17 +459,17 @@ function tick() {
   const deltaTime = Math.min(clock.getDelta(), 0.05);
 
   if (start.start) {
+      if (soldier_mixer) soldier_mixer.update(deltaTime);
+
     animateHelicopter();
-    // if(!helicopter_Direction){
-    //   group.rotateY(Math.PI)
-    // }
+
     const A = parachuteVisiblty.visible
       ? parachuteWidthForCalculations * parachuteHightForCalculations * 2
       : 0.7;
     const Cd = parachuteVisiblty.visible ? 2.2 : 1;
     const k = calculateK(Cd, A);
 
-    const result = stepSemiImplicit(
+    const result = newPosition(
       x,
       y,
       z,
@@ -508,7 +512,6 @@ function tick() {
       camera2.lookAt(group.position);
     }
     if (activeCamera === camera3) {
-      console.log(3);
       camera3.lookAt(group.position);
     }
 
@@ -550,6 +553,8 @@ function tick() {
       wind_Velocity.wind_Velocity_On_Y_Axis = 0;
       wind_Velocity.wind_Velocity_On_Z_Axis = 0;
 
+      // soldier_mixer = null;
+      soldier_mixer_Standing.update(deltaTime);
       group.position.set(x, y, z);
     }
   } else {
@@ -581,7 +586,6 @@ function tick() {
       }
     }
   }
-  if (soldier_mixer) soldier_mixer.update(deltaTime);
   if (soldier_mixer_First) soldier_mixer_First.update(deltaTime);
 
   if (helicopter_mixer) helicopter_mixer.update(deltaTime);
